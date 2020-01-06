@@ -200,7 +200,7 @@ char *pre_parse(char *to_parse, s_format *format, s_utils *utils)
     }
     while (1)
         if (*to_parse == '#' || *to_parse == '-' || *to_parse == '+'
-        || *to_parse == ' ' || (*to_parse == '0' && !(format->flags_set & FLAGS_ZERO)))
+        || *to_parse == ' ' || *to_parse == '0')
             to_parse = handle_flag(to_parse, format);
         else
             break ;
