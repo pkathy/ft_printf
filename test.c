@@ -16,8 +16,8 @@ int main() {
    // printf("%.200f\n", 0.33);
     printf(" %5u\n", -500000);
      */
-    int ret = ft_printf("% 10d\n", 5, 10);
-    int ret1 = printf("% 10d\n", 5, 10);
+    int ret = ft_printf("%0+10d\n", 5, 10);
+    int ret1 = printf("%0+10d\n", 5, 10);
     printf("ret: %d\n", ret);
     printf("ret1: %d\n", ret1);
     return 0;
