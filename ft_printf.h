@@ -19,19 +19,25 @@
 # include <unistd.h>
 # include <string.h>
 
-typedef struct t_s {
+typedef struct  t_s {
     int  width;
     int  precision;
     char conversion;
     char *length;
     va_list *data;
     unsigned int flags_set;
-} s_format;
+}               s_format;
 
+typedef struct	s_str
+{
+    char 		*str;
+    int 		length;
+}				t_str;
 
 int ft_printf(const char* format, ...);
-int print_int(s_format *format);
-int print_float(s_format *format);
-int print_string(s_format *format);
+t_str print_int(s_format *format);
+t_str print_float(s_format *format);
+t_str print_string(s_format *format);
+t_str print_pointer(s_format *format);
 
 #endif
