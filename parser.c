@@ -38,7 +38,7 @@ char    *handle_flag(char *c, s_format *format)
 char    *handle_width(char *c, s_format *format)
 {
     if (*c == '*')
-        format->flags_set |= FLAGS_STAR;
+        format->width = va_arg(*(format->data), int);
     else if (*c >= '0' && *c <= '9')
     {
         //temp solution
@@ -88,6 +88,28 @@ char    *handle_conversion(char *c, s_format *format, int *error, int *count)
     return (++c);
 }
 
+char *pre_parse(char *to_parse, s_format *format, int *count, int *error)
+{
+    if (*to_parse == '%')
+    {
+        (*count)++;
+        *error = 1;
+        write(1, to_parse++, 1);
+        return (to_parse);
+    }
+    while (1)
+        if (*to_parse == '#' || *to_parse == '-' || *to_parse == '+' || *to_parse == ' ')
+            to_parse = handle_flag(to_parse, format);
+        else
+            break ;
+    if (*to_parse == '0')
+        to_parse = handle_flag(to_parse, format);
+    if ((*to_parse >= '0' && *to_parse <= '9') || *to_parse == '*')
+        to_parse = handle_width(to_parse, format);
+    if (*to_parse == '.')
+        to_parse = handle_precision(++to_parse, format);
+    return (to_parse);
+}
 int parse(char *to_parse, s_format *format, va_list *va, s_utils *utils)
 {
     char *start;
@@ -102,19 +124,11 @@ int parse(char *to_parse, s_format *format, va_list *va, s_utils *utils)
             write(1, to_parse++, 1);
             continue ;
         }
-        start = (char *)to_parse++;
-        while (1)
-            if (*to_parse == '#' || *to_parse == '-' || *to_parse == '+' || *to_parse == ' ')
-                to_parse = handle_flag(to_parse, format);
-            else
-                break ;
-        if (*to_parse == '0')
-            to_parse = handle_flag(to_parse, format);
-        if ((*to_parse >= '0' && *to_parse <= '9') || *to_parse == '*')
-            to_parse = handle_width(to_parse, format);
-        if (*to_parse == '.')
-            to_parse = handle_precision(++to_parse, format);
         format->data = va;
+        start = (char *)to_parse++;
+        to_parse = pre_parse(to_parse, format, &(utils->count), &(utils->error));
+        if (utils->error)
+            continue ;
         to_parse = handle_conversion(to_parse, format, &(utils->error), &(utils->count));
         if (utils->error)
         {
@@ -123,6 +137,17 @@ int parse(char *to_parse, s_format *format, va_list *va, s_utils *utils)
         }
     }
     return (utils->count);
+}
+
+size_t ft_strnlen(const char *str, size_t maxlen)
+{
+    const char *p;
+
+    p = str;
+
+    while (maxlen-- > 0 && *p)
+        p++;
+    return (p - str);
 }
 
 int ft_printf(const char* format, ...)
@@ -135,15 +160,12 @@ int ft_printf(const char* format, ...)
     utils.count = 0;
     utils.error = 0;
     va_start(va, format);
-    ret = parse((char *)format, &f, &va, &utils);
+    if (ft_strnlen(format, 2) == 1 && *format == '%')
+        ret = -1;
+    else
+        ret = parse((char *)format, &f, &va, &utils);
     va_end(va);
     return (ret);
 }
 
-int main() {
-    int a = ft_printf("%d %d %d\n", 4, 3, 2);
-    ft_printf("%d\n",a);
-
-    return 0;
-}
 
