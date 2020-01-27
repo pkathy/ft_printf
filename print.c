@@ -18,8 +18,13 @@ t_str print_int(s_format *format)
 {
     long to_print;
     t_str ret;
-
     to_print = va_arg(*(format->data), int);
+    if (to_print < 0)
+    {
+        ret.sign = '-';
+        to_print *= -1;
+    } else
+        ret.sign = '+';
     ret.str = ft_itoa(to_print);
     ret.length = ft_strlen(ret.str);
     return (ret);

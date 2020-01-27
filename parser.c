@@ -122,12 +122,90 @@ char *make_str(long len, char c)
     }
     return (temp);
 }
+
+void clean_strjoin_left(char **result, int count, ...)
+{
+    va_list va;
+    char *temp;
+    char *temp1;
+
+    va_start(va, count);
+    while(count-- > 0)
+    {
+        temp = *result;
+        temp1 = va_arg(va, char *);
+        *result = ft_strjoin(temp1, *result);
+        free(temp);
+        free(temp1);
+    }
+    va_end(va);
+}
+
+void clean_strjoin_right(char **result, int count, ...)
+{
+    va_list va;
+    char *temp;
+    char *temp1;
+
+    va_start(va, count);
+    while(count-- > 0)
+    {
+        temp = *result;
+        temp1 = va_arg(va, char *);
+        *result = ft_strjoin(*result, temp1);
+        free(temp);
+        free(temp1);
+    }
+    va_end(va);
+}
+
 int print_flags(s_format *format)
 {
     t_str ret;
+    char *right_part;
+    char *left_part;
+
+    ret = print_conversion(format);
+    right_part = ret.str;
+    left_part = ft_strdup("");
+    if (format->flags_set & FLAGS_ZERO && format->flags_set & FLAGS_MINUS)
+        format->flags_set ^= FLAGS_ZERO;
+    if ((format->flags_set & FLAGS_SPACE || format->flags_set & FLAGS_PLUS)
+        && strchr("fpdiouxX", format->conversion) && ret.sign != '-')
+    {
+        free(left_part);
+        left_part = ft_strdup(format->flags_set & FLAGS_PLUS ? "+" : " ");
+        (ret.length)++;
+    }
+    if (ret.sign == '-')
+    {
+        free(left_part);
+        left_part = ft_strdup("-");
+        (ret.length)++;
+    }
+    if (format->flags_set & FLAGS_MINUS)
+    {
+        if (format->width != -1 && (format->width - ret.length) > 0)
+            clean_strjoin_right(&right_part, 1,
+                          make_str(format->width - ret.length, ' '));
+    }
+    else
+    {
+        if (format->width != -1 && (format->width - ret.length) > 0)
+            clean_strjoin_left(&right_part, 1,
+                               make_str(format->width - ret.length,
+                                        format->flags_set & FLAGS_ZERO ? '0' : ' '));
+    }
+    ret.length += (format->width - ret.length) > 0 ? format->width - ret.length : 0;
+    write(1, left_part, ft_strlen(left_part));
+    write(1, right_part, ft_strlen(right_part));
+    return (ret.length);
+}
+
+int print_flags1(s_format *format)
+{
+    t_str ret;
     char *result;
-    char *temp;
-    char *temp1;
 
     ret = print_conversion(format);
     result = ret.str;
@@ -136,28 +214,25 @@ int print_flags(s_format *format)
     && !(format->flags_set & FLAGS_ZERO))
     {
         result = ft_strjoin(format->flags_set & FLAGS_SPACE ? " " : "+", result);
+        clean_strjoin_left(&result, 1,
+                      format->flags_set & FLAGS_SPACE ? ft_strdup(" ") : ft_strdup("+"));
         (ret.length)++;
     }
     if (format->width != -1 && (format->width - ret.length) > 0)
     {
-        temp = result;
         if (format->flags_set & FLAGS_MINUS)
-        {
-            temp1 = make_str(format->width - ret.length, ' ');
-            result = ft_strjoin(result, temp1);
-        }
+            clean_strjoin_left(&result, 1,
+                           make_str(format->width - ret.length, ' '));
         else
         {
-            temp1 = make_str(format->width - ret.length, format->flags_set & FLAGS_ZERO ? '0' : ' ');
-            result = ft_strjoin(temp1, result);
+
             if ((format->flags_set & FLAGS_SPACE || format->flags_set & FLAGS_PLUS)
                 && strchr("fpdiouxX", format->conversion) && *(ret.str) != '-'
                 && (format->flags_set & FLAGS_ZERO))
-                result[0] = format->flags_set & FLAGS_SPACE ? ' ' : '+';
+                clean_strjoin_left(&result, 1, format->flags_set & FLAGS_SPACE ? ' ' : '+');
+
         }
         ret.length += format->width - ret.length;
-        free(temp);
-        free(temp1);
     }
     write(1, result, ret.length);
     return (ret.length);

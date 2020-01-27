@@ -32,6 +32,7 @@ typedef struct	s_str
 {
     char 		*str;
     int 		length;
+    char        sign;
 }				t_str;
 
 int ft_printf(const char* format, ...);
