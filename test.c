@@ -19,7 +19,7 @@ int main() {
    // printf("%.200f\n", 0.33);
     printf(" %5u\n", -500000);
      */
-    int ret = ft_printf("%d\n", 123);
+    int ret = ft_printf("%#x\n", 10);
     //int ret1 = printf("%*d\n");
     //int ret1 = printf("%o\n", 9);
     //int ret1 = printf("%020d\n",-1234567);

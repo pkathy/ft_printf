@@ -60,9 +60,9 @@ t_str print_int(s_format *format)
     if (format->flags_set & FLAGS_HASH && ft_strchr("oxX", format->conversion))
     {
         if (format->conversion == 'o')
-            clean_strjoin_left(&(ret.str), 1, "0");
+            clean_strjoin_left(&(ret.str), 1, ft_strdup("0"));
         else
-            clean_strjoin_left(&(ret.str), 1, "0x");
+            clean_strjoin_left(&(ret.str), 1, ft_strdup("0x"));
         ret.length += format->conversion == 'o' ? 1 : 2;
     }
 

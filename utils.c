@@ -59,6 +59,6 @@ void to_lower_str(char *str)
     {
         if (*str <= 'Z' && *str >= 'A')
             *str += 'a' - 'A';
-        (*str)++;
+        (str)++;
     }
 }
