@@ -106,57 +106,20 @@ t_str print_conversion(s_format *format)
 
 }
 
-char *make_str(long len, char c)
+
+void validate_flags(s_format *format)
 {
-    char *temp;
-    int i;
-    printf("in: %lu\n", len);
-    if (len <= 0)
-        return (0);
-    i = -1;
-    if(!(temp = ft_strnew(len)))
-        return (0);
-    while (++i < len)
+    if (format->flags_set & FLAGS_ZERO && format->flags_set & FLAGS_MINUS)
+        format->flags_set ^= FLAGS_ZERO;
+    if (format->flags_set & FLAGS_PLUS && format->flags_set & FLAGS_SPACE)
+        format->flags_set ^= FLAGS_SPACE;
+    if (!ft_strchr("fpdiouxX", format->conversion))
     {
-        temp[i] = c;
+        format->flags_set ^= FLAGS_SPACE;
+        format->flags_set ^= FLAGS_PLUS;
+        format->flags_set ^= FLAGS_ZERO;
+        format->flags_set ^= FLAGS_HASH;
     }
-    return (temp);
-}
-
-void clean_strjoin_left(char **result, int count, ...)
-{
-    va_list va;
-    char *temp;
-    char *temp1;
-
-    va_start(va, count);
-    while(count-- > 0)
-    {
-        temp = *result;
-        temp1 = va_arg(va, char *);
-        *result = ft_strjoin(temp1, *result);
-        free(temp);
-        free(temp1);
-    }
-    va_end(va);
-}
-
-void clean_strjoin_right(char **result, int count, ...)
-{
-    va_list va;
-    char *temp;
-    char *temp1;
-
-    va_start(va, count);
-    while(count-- > 0)
-    {
-        temp = *result;
-        temp1 = va_arg(va, char *);
-        *result = ft_strjoin(*result, temp1);
-        free(temp);
-        free(temp1);
-    }
-    va_end(va);
 }
 
 int print_flags(s_format *format)
@@ -168,10 +131,8 @@ int print_flags(s_format *format)
     ret = print_conversion(format);
     right_part = ret.str;
     left_part = ft_strdup("");
-    if (format->flags_set & FLAGS_ZERO && format->flags_set & FLAGS_MINUS)
-        format->flags_set ^= FLAGS_ZERO;
     if ((format->flags_set & FLAGS_SPACE || format->flags_set & FLAGS_PLUS)
-        && strchr("fpdiouxX", format->conversion) && ret.sign != '-')
+    && ret.sign != '-')
     {
         free(left_part);
         left_part = ft_strdup(format->flags_set & FLAGS_PLUS ? "+" : " ");
@@ -202,41 +163,6 @@ int print_flags(s_format *format)
     return (ret.length);
 }
 
-int print_flags1(s_format *format)
-{
-    t_str ret;
-    char *result;
-
-    ret = print_conversion(format);
-    result = ret.str;
-    if ((format->flags_set & FLAGS_SPACE || format->flags_set & FLAGS_PLUS)
-    && strchr("fpdiouxX", format->conversion) && *(ret.str) != '-'
-    && !(format->flags_set & FLAGS_ZERO))
-    {
-        result = ft_strjoin(format->flags_set & FLAGS_SPACE ? " " : "+", result);
-        clean_strjoin_left(&result, 1,
-                      format->flags_set & FLAGS_SPACE ? ft_strdup(" ") : ft_strdup("+"));
-        (ret.length)++;
-    }
-    if (format->width != -1 && (format->width - ret.length) > 0)
-    {
-        if (format->flags_set & FLAGS_MINUS)
-            clean_strjoin_left(&result, 1,
-                           make_str(format->width - ret.length, ' '));
-        else
-        {
-
-            if ((format->flags_set & FLAGS_SPACE || format->flags_set & FLAGS_PLUS)
-                && strchr("fpdiouxX", format->conversion) && *(ret.str) != '-'
-                && (format->flags_set & FLAGS_ZERO))
-                clean_strjoin_left(&result, 1, format->flags_set & FLAGS_SPACE ? ' ' : '+');
-
-        }
-        ret.length += format->width - ret.length;
-    }
-    write(1, result, ret.length);
-    return (ret.length);
-}
 
 char    *handle_conversion(char *c, s_format *format, s_utils *s)
 {
@@ -258,8 +184,8 @@ char    *handle_conversion(char *c, s_format *format, s_utils *s)
     }
     format->length = len;
     format->conversion = *c;
+    validate_flags(format);
     (s->count) += print_flags(format);
-    //ft_strdel(&len);
     return (++c);
 }
 

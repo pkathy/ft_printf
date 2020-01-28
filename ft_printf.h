@@ -40,5 +40,9 @@ t_str print_int(s_format *format);
 t_str print_float(s_format *format);
 t_str print_string(s_format *format);
 t_str print_pointer(s_format *format);
+char *make_str(long len, char c);
+void clean_strjoin_left(char **result, int count, ...);
+void clean_strjoin_right(char **result, int count, ...);
+void to_lower_str(char *str);
 
 #endif
