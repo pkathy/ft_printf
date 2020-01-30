@@ -4,7 +4,7 @@ char *make_str(long len, char c)
 {
     char *temp;
     int i;
-    printf("in: %lu\n", len);
+
     if (len <= 0)
         return (0);
     i = -1;

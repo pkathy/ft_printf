@@ -89,6 +89,8 @@ char    *handle_precision(char *c, s_format *format)
             ++c;
         return (c);
     }
+    else
+        return (c);
     return (++c);
 }
 
@@ -126,9 +128,9 @@ void validate_flags(s_format *format)
         format->flags_set &= TRUE_MASK - FLAGS_PLUS;
         format->flags_set &= TRUE_MASK - FLAGS_ZERO;
     }
-    if (format->flags_set & FLAGS_ZERO && format->flags_set & FLAGS_MINUS)
+    if (format->flags_set & FLAGS_MINUS || format->precision > -1)
         format->flags_set &= TRUE_MASK - FLAGS_ZERO;
-    if (format->flags_set & FLAGS_PLUS && format->flags_set & FLAGS_SPACE)
+    if (format->flags_set & FLAGS_PLUS)
         format->flags_set &= TRUE_MASK - FLAGS_SPACE;
 }
 
@@ -252,6 +254,7 @@ char *pre_parse(char *to_parse, s_format *format, s_utils *utils)
         to_parse = handle_width(to_parse, format, utils);
     if (*to_parse == '.')
         to_parse = handle_precision(++to_parse, format);
+
     return (to_parse);
 }
 int parse(char *to_parse, s_format *format, va_list *va, s_utils *utils)

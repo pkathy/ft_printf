@@ -87,6 +87,17 @@ void *handle_length(s_format *format)
 
 //does not work now
 
+void append_int_precision(s_format *format, t_str *in)
+{
+    long d;
+
+    d = format->precision - ft_strlen(in->str);
+    if (d > 0)
+    {
+        clean_strjoin_left(&(in->str), 1, make_str(d, '0'));
+        in->length += d;
+    }
+}
 
 t_str print_unsigned(s_format *format)
 {
@@ -96,6 +107,7 @@ t_str print_unsigned(s_format *format)
     to_print = *(unsigned long long *)handle_unsigned_length(format);
     ret.sign = '+';
     int_to_base(to_print, 10, &ret);
+    append_int_precision(format, &ret);
     return (ret);
 }
 
@@ -113,6 +125,7 @@ t_str print_int(s_format *format)
     int_to_base(to_print > 0 ? to_print : -1*to_print, base, &ret);
     if (format->conversion == 'x')
         to_lower_str(ret.str);
+    append_int_precision(format, &ret);
     if (format->flags_set & FLAGS_HASH && ft_strchr("oxX", format->conversion))
     {
         if (format->conversion == 'o')
