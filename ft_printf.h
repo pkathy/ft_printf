@@ -12,6 +12,7 @@
 # define FLAGS_LONG_LONG (1U <<  9U)
 # define FLAGS_PRECISION (1U << 10U)
 # define FLAGS_STAR      (1U << 11U)
+# define TRUE_MASK       (1U << 12U) - 1
 # include "./libft/libft.h"
 # include <stdio.h>
 # include <stdlib.h>

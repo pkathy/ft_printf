@@ -30,6 +30,10 @@ typedef struct s_s {
     int error;
     char *first_star;
 } s_utils;
+typedef struct t_a {
+    char *left_part;
+    char *right_part;
+} s_print;
 
 void clear_format(s_format *f)
 {
@@ -109,57 +113,97 @@ t_str print_conversion(s_format *format)
 
 void validate_flags(s_format *format)
 {
-    if (format->flags_set & FLAGS_ZERO && format->flags_set & FLAGS_MINUS)
-        format->flags_set ^= FLAGS_ZERO;
-    if (format->flags_set & FLAGS_PLUS && format->flags_set & FLAGS_SPACE)
-        format->flags_set ^= FLAGS_SPACE;
-    if (!ft_strchr("fpdiouxX", format->conversion))
+    if (!ft_strchr("fpdiuoxX", format->conversion))
     {
-        format->flags_set ^= FLAGS_SPACE;
-        format->flags_set ^= FLAGS_PLUS;
-        format->flags_set ^= FLAGS_ZERO;
-        format->flags_set ^= FLAGS_HASH;
+        format->flags_set &= TRUE_MASK - FLAGS_SPACE;
+        format->flags_set &= TRUE_MASK - FLAGS_PLUS;
+        format->flags_set &= TRUE_MASK - FLAGS_ZERO;
+        format->flags_set &= TRUE_MASK - FLAGS_HASH;
+    }
+    if (ft_strchr("oxX", format->conversion))
+    {
+        format->flags_set &= TRUE_MASK - FLAGS_SPACE;
+        format->flags_set &= TRUE_MASK - FLAGS_PLUS;
+        format->flags_set &= TRUE_MASK - FLAGS_ZERO;
+    }
+    if (format->flags_set & FLAGS_ZERO && format->flags_set & FLAGS_MINUS)
+        format->flags_set &= TRUE_MASK - FLAGS_ZERO;
+    if (format->flags_set & FLAGS_PLUS && format->flags_set & FLAGS_SPACE)
+        format->flags_set &= TRUE_MASK - FLAGS_SPACE;
+}
+
+void apppend_sign_m(s_print *p, t_str *in, s_format *format)
+{
+    if (in->sign == '-')
+        clean_strjoin_left(&(p->right_part), 1, ft_strdup("-"));
+    else if (format->flags_set & FLAGS_PLUS)
+        clean_strjoin_left(&(p->right_part), 1, ft_strdup("+"));
+    else if (format->flags_set & FLAGS_SPACE)
+        clean_strjoin_left(&(p->right_part), 1, ft_strdup(" "));
+}
+
+void append_sign(s_print *p, t_str *in, s_format *format)
+{
+    if (format->flags_set & FLAGS_MINUS)
+    {
+        apppend_sign_m(p, in, format);
+        return ;
+    }
+    if (format->flags_set & FLAGS_ZERO)
+    {
+        if (in->sign == '-')
+            clean_strjoin_left(&(p->left_part), 1, ft_strdup("-"));
+        else if (format->flags_set & FLAGS_PLUS)
+            clean_strjoin_left(&(p->left_part), 1, ft_strdup("+"));
+        else if (format->flags_set & FLAGS_SPACE)
+            clean_strjoin_left(&(p->left_part), 1, ft_strdup(" "));
+    }
+    else
+    {
+        if (in->sign == '-')
+            clean_strjoin_right(&(p->left_part), 1, ft_strdup("-"));
+        else if (format->flags_set & FLAGS_PLUS)
+            clean_strjoin_right(&(p->left_part), 1, ft_strdup("+"));
+        else if (format->flags_set & FLAGS_SPACE)
+            clean_strjoin_right(&(p->left_part), 1, ft_strdup(" "));
     }
 }
 
+void handle_sign(s_format *format, t_str *str)
+{
+    if (format->flags_set & FLAGS_SPACE
+    || format->flags_set & FLAGS_PLUS
+    || str->sign == '-')
+        (str->length)++;
+}
+//right part - integer with or without sign
+//left part - width with or without sign
 int print_flags(s_format *format)
 {
     t_str ret;
-    char *right_part;
-    char *left_part;
+    s_print p;
 
     ret = print_conversion(format);
-    right_part = ret.str;
-    left_part = ft_strdup("");
-    if ((format->flags_set & FLAGS_SPACE || format->flags_set & FLAGS_PLUS)
-    && ret.sign != '-')
-    {
-        free(left_part);
-        left_part = ft_strdup(format->flags_set & FLAGS_PLUS ? "+" : " ");
-        (ret.length)++;
-    }
-    if (ret.sign == '-')
-    {
-        free(left_part);
-        left_part = ft_strdup("-");
-        (ret.length)++;
-    }
+    p.right_part = ret.str;
+    p.left_part = ft_strnew(0);
+    handle_sign(format, &ret);
     if (format->flags_set & FLAGS_MINUS)
     {
         if (format->width != -1 && (format->width - ret.length) > 0)
-            clean_strjoin_right(&right_part, 1,
+            clean_strjoin_right(&(p.right_part), 1,
                           make_str(format->width - ret.length, ' '));
     }
     else
     {
         if (format->width != -1 && (format->width - ret.length) > 0)
-            clean_strjoin_left(&right_part, 1,
+            clean_strjoin_right(&(p.left_part), 1,
                                make_str(format->width - ret.length,
                                         format->flags_set & FLAGS_ZERO ? '0' : ' '));
     }
+    append_sign(&p, &ret, format);
     ret.length += (format->width - ret.length) > 0 ? format->width - ret.length : 0;
-    write(1, left_part, ft_strlen(left_part));
-    write(1, right_part, ft_strlen(right_part));
+    write(1, p.left_part, ft_strlen(p.left_part));
+    write(1, p.right_part, ft_strlen(p.right_part));
     return (ret.length);
 }
 
@@ -193,7 +237,6 @@ char *pre_parse(char *to_parse, s_format *format, s_utils *utils)
 {
     if (*to_parse == '%')
     {
-        printf("e\n");
         utils->count++;
         utils->error = 1;
         write(1, to_parse++, 1);
