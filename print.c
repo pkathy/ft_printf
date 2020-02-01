@@ -5,7 +5,7 @@
 //conversions with l L: f
 //width and precision - handle int overflow
 
-unsigned long int_len(unsigned long long n, int base)
+unsigned long long int_len(unsigned long long n, int base)
 {
     unsigned long long len;
 
@@ -18,9 +18,22 @@ unsigned long int_len(unsigned long long n, int base)
     return (len);
 }
 
+size_t pointer_len(size_t n)
+{
+    size_t len;
+
+    len = 0;
+    while (n > 0)
+    {
+        len++;
+        n /= 16;
+    }
+    return (len);
+}
+
 void int_to_base(unsigned long long n, char base, t_str *res)
 {
-    int len;
+    size_t len;
     char *base_str;
 
     base_str = "0123456789ABCDEF";
@@ -33,6 +46,24 @@ void int_to_base(unsigned long long n, char base, t_str *res)
         len--;
         n /= base;
     }
+}
+
+void pointer_to_str(size_t n, t_str *res)
+{
+    size_t len;
+    char *base_str;
+
+    base_str = "0123456789abcdef";
+    len = pointer_len(n);
+    res->str = ft_strnew(len);
+    res->length = len + 2;
+    while(n > 0)
+    {
+        res->str[len - 1] = base_str[n % 16];
+        len--;
+        n /= 16;
+    }
+    clean_strjoin_left(&(res->str), 1, ft_strdup("0x"));
 }
 
 int set_base(char c)
@@ -50,7 +81,7 @@ void *handle_unsigned_length(s_format *format)
     void *ret;
     unsigned long long u_n;
 
-    ret = ft_memalloc(sizeof(long long));
+    ret = ft_memalloc(sizeof(unsigned long long));
     if (ft_strequ(format->length, "l"))
         u_n = (unsigned long)va_arg(*(format->data), unsigned long);
     else if (ft_strequ(format->length, "ll"))
@@ -87,16 +118,31 @@ void *handle_length(s_format *format)
 
 //does not work now
 
-void append_int_precision(s_format *format, t_str *in)
+void handle_int_precision(s_format *format, t_str *in)
 {
-    long d;
+    size_t len;
 
-    d = format->precision - ft_strlen(in->str);
-    if (d > 0)
+    len = ft_strlen(in->str);
+    if (format->precision > len)
     {
-        clean_strjoin_left(&(in->str), 1, make_str(d, '0'));
-        in->length += d;
+        clean_strjoin_left(&(in->str), 1,
+                make_str(format->precision - len, '0'));
+        in->length += format->precision - len;
     }
+}
+
+void handle_str_precision(s_format *format, t_str *in)
+{
+    size_t len;
+
+    len = ft_strlen(in->str);
+    if (format->precision < len && format->precision >= 0)
+    {
+        (in->str)[format->precision] = 0;
+        in->length = format->precision;
+    }
+    else
+        in->length = len;
 }
 
 t_str print_unsigned(s_format *format)
@@ -107,7 +153,7 @@ t_str print_unsigned(s_format *format)
     to_print = *(unsigned long long *)handle_unsigned_length(format);
     ret.sign = '+';
     int_to_base(to_print, 10, &ret);
-    append_int_precision(format, &ret);
+    handle_int_precision(format, &ret);
     return (ret);
 }
 
@@ -125,7 +171,7 @@ t_str print_int(s_format *format)
     int_to_base(to_print > 0 ? to_print : -1*to_print, base, &ret);
     if (format->conversion == 'x')
         to_lower_str(ret.str);
-    append_int_precision(format, &ret);
+    handle_int_precision(format, &ret);
     if (format->flags_set & FLAGS_HASH && ft_strchr("oxX", format->conversion))
     {
         if (format->conversion == 'o')
@@ -152,24 +198,25 @@ t_str print_string(s_format *format)
         to_print = va_arg(*(format->data), char *);
         ret.str = ft_strdup(to_print);
     }
-    ret.length = ft_strlen(ret.str);
+    handle_str_precision(format, &ret);
     return (ret);
 }
+
 t_str print_pointer(s_format *format)
 {
-    long to_print;
+    size_t to_print;
     t_str ret;
 
-    to_print = va_arg(*(format->data), int);
-    ft_putnbr(to_print);
+    to_print = va_arg(*(format->data), size_t);
+    pointer_to_str(to_print, &ret);
     return (ret);
 }
+
 t_str print_float(s_format *format)
 {
     long to_print;
     t_str ret;
 
     to_print = va_arg(*(format->data), int);
-    ft_putnbr(to_print);
     return (ret);
 }

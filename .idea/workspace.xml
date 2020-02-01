@@ -15,7 +15,6 @@
       <change beforePath="$PROJECT_DIR$/parser.c" beforeDir="false" afterPath="$PROJECT_DIR$/parser.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/print.c" beforeDir="false" afterPath="$PROJECT_DIR$/print.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/test.c" beforeDir="false" afterPath="$PROJECT_DIR$/test.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.c" beforeDir="false" afterPath="$PROJECT_DIR$/utils.c" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -43,7 +42,7 @@
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../42/ft_printf/test.c" />
+    <property name="last_opened_file_path" value="$USER_HOME$/42/ft_printf/test.c" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
   </component>
@@ -78,7 +77,8 @@
       <workItem from="1578405625520" duration="8818000" />
       <workItem from="1580141593273" duration="5819000" />
       <workItem from="1580208973266" duration="7978000" />
-      <workItem from="1580378945294" duration="16135000" />
+      <workItem from="1580378945294" duration="16448000" />
+      <workItem from="1580563774199" duration="6237000" />
     </task>
     <servers />
   </component>

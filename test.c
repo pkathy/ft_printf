@@ -8,6 +8,7 @@
 int main() {
     int a = -1;
     int *b = &a;
+    char c = 'd';
     char *test = "aaaaaaaaaa";
     int number = 1234567;
     t_str str;
@@ -19,10 +20,12 @@ int main() {
     printf(" %5u\n", -500000);
      */
 
-    int ret = ft_printf("%#7.4d\n", 10);
+    //int ret = ft_printf("%#7.4d\n", 10);
+    int ret = ft_printf("%с\n", c);
     //int ret1 = printf("%*d\n");
     //int ret1 = printf("%o\n", 9);
-    int ret1 = printf("%#7.4d\n", 10);
+
+    int ret1 = printf("%с\n", c);
     //int ret1 = printf("%020d\n",-1234567);
     printf("ret: %d\n", ret);
     printf("ret1: %d\n", ret1);

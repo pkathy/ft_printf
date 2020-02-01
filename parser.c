@@ -216,9 +216,9 @@ char    *handle_conversion(char *c, s_format *format, s_utils *s)
     char *len;
 
     start = c;
-    if (strchr("lh", *c))
+    if (strchr("lhL", *c))
     {
-        while (strchr("lh", *c))
+        while (strchr("lhL", *c))
             ++c;
         len = ft_strnew(c - start);
         ft_strncpy(len, start, c - start);
